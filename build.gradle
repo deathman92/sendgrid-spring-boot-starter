@@ -98,7 +98,7 @@ bintray {
         name = "${project.name}"
         desc = "${project.description}"
         licenses = ["MIT"]
-        labels = ["sendgrid", "starter", "spring", "boot", "autoconfiguration", "mail"]
+        labels = ["sendgrid", "spring", "boot", "starter", "autoconfiguration", "mail"]
         websiteUrl = "https://github.com/deathman92/sendgrid-spring-boot-starter"
         issueTrackerUrl = "https://github.com/deathman92/sendgrid-spring-boot-starter/issues"
         vcsUrl = "https://github.com/deathman92/sendgrid-spring-boot-starter.git"
