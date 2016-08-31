@@ -1,0 +1,118 @@
+buildscript {
+
+    ext['propdeps.version'] = '0.0.7'
+    ext['gradle.props.version'] = '1.4.5'
+    ext['bintray.version'] = '1.7'
+
+    repositories {
+        jcenter()
+        maven {url "https://plugins.gradle.org/m2/"}
+        maven {url "http://repo.spring.io/plugins-release"}
+    }
+    dependencies {
+        classpath("org.springframework.build.gradle:propdeps-plugin:${property('propdeps.version')}")
+        classpath("net.saliman:gradle-properties-plugin:${property('gradle.props.version')}")
+        classpath("com.jfrog.bintray.gradle:gradle-bintray-plugin:${property('bintray.version')}")
+    }
+}
+
+ext['project.version'] = '1.0.0'
+
+ext['sendgrid.version'] = '3.0.9'
+ext['spring.boot.version'] = '1.4.0.RELEASE'
+ext['lombok.version'] = '1.16.10'
+
+ext['junit.version'] = '4.12'
+ext['assertj.version'] = '2.5.0'
+
+group "com.github.deathman92"
+version "${property('project.version')}"
+description 'Spring Boot starter for SendGrid v3'
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'propdeps'
+apply plugin: 'propdeps-maven'
+apply plugin: 'propdeps-idea'
+apply plugin: 'net.saliman.properties'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+ext {
+    bintrayUser = "${System.env['CI_BINTRAY_USER'] ?: property('bintray.user')}"
+    bintrayKey = "${System.env['CI_BINTRAY_KEY'] ?: property('bintray.key')}"
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+dependencies {
+    compile("com.sendgrid:sendgrid-java:${property('sendgrid.version')}")
+    provided("org.springframework.boot:spring-boot-starter:${property('spring.boot.version')}")
+    provided("org.projectlombok:lombok:${property('lombok.version')}")
+    optional("org.springframework.boot:spring-boot-configuration-processor:${property('spring.boot.version')}")
+    testCompile("org.springframework.boot:spring-boot-starter-test:${property('spring.boot.version')}")
+    testCompile("junit:junit:${property('junit.version')}")
+    testCompile("org.assertj:assertj-core:${property('assertj.version')}")
+}
+
+compileJava.dependsOn(processResources)
+
+test {
+    testLogging.showStandardStreams = true
+
+    beforeTest { descriptor ->
+        logger.lifecycle("Running test: " + descriptor)
+    }
+}
+
+task sourcesJar (type: Jar) {
+    classifier 'sources'
+    from sourceSets.main.allSource
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId "${project.group}"
+            artifactId "${project.name}"
+            version "${project.version}"
+
+            from components.java
+            artifact sourcesJar
+        }
+    }
+}
+
+bintray {
+    user = "${bintrayUser}"
+    key = "${bintrayKey}"
+    publications = ["mavenJava"]
+    pkg {
+        repo = "maven-release"
+        name = "${project.name}"
+        desc = "${project.description}"
+        licenses = ["MIT"]
+        labels = ["sendgrid", "starter", "spring", "boot", "autoconfiguration", "mail"]
+        websiteUrl = "https://github.com/deathman92/sendgrid-spring-boot-starter"
+        issueTrackerUrl = "https://github.com/deathman92/sendgrid-spring-boot-starter/issues"
+        vcsUrl = "https://github.com/deathman92/sendgrid-spring-boot-starter.git"
+
+        githubRepo = "deathman92/sendgrid-spring-boot-starter"
+        githubReleaseNotesFile = "README.md"
+
+        version {
+            name = "${project.version}"
+            released = new Date()
+        }
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '3.0'
+}

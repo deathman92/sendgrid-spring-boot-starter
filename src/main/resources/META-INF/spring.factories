@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.github.deathman92.spring.boot.sendgrid.SendGridAutoconfiguration
